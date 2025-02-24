@@ -736,6 +736,8 @@ namespace RTC
 			packet->logger.Dropped(RtcLogger::RtpPacket::DropReason::CONSUMER_INACTIVE);
 #endif
 
+			this->rtpSeqManager->Drop(packet->GetSequenceNumber());
+
 			return;
 		}
 
@@ -744,6 +746,8 @@ namespace RTC
 #ifdef MS_RTC_LOGGER_RTP
 			packet->logger.Dropped(RtcLogger::RtpPacket::DropReason::INVALID_TARGET_LAYER);
 #endif
+
+			this->rtpSeqManager->Drop(packet->GetSequenceNumber());
 
 			return;
 		}
@@ -777,6 +781,8 @@ namespace RTC
 				packet->logger.Dropped(RtcLogger::RtpPacket::DropReason::NOT_A_KEYFRAME);
 #endif
 
+				this->rtpSeqManager->Drop(packet->GetSequenceNumber());
+
 				return;
 			}
 
@@ -804,6 +810,7 @@ namespace RTC
 			packet->logger.Dropped(RtcLogger::RtpPacket::DropReason::NOT_A_KEYFRAME);
 #endif
 
+			this->rtpSeqManager->Drop(packet->GetSequenceNumber());
 			return;
 		}
 
@@ -811,11 +818,11 @@ namespace RTC
 		// not have payload other than padding, then drop it.
 		if (spatialLayer == this->currentSpatialLayer && packet->GetPayloadLength() == 0)
 		{
-			this->rtpSeqManager->Drop(packet->GetSequenceNumber());
-
 #ifdef MS_RTC_LOGGER_RTP
 			packet->logger.Dropped(RtcLogger::RtpPacket::DropReason::EMPTY_PAYLOAD);
 #endif
+
+			this->rtpSeqManager->Drop(packet->GetSequenceNumber());
 
 			return;
 		}
@@ -935,6 +942,8 @@ namespace RTC
 					packet->logger.Dropped(RtcLogger::RtpPacket::DropReason::TOO_HIGH_TIMESTAMP_EXTRA_NEEDED);
 #endif
 
+					this->rtpSeqManager->Drop(packet->GetSequenceNumber());
+
 					return;
 				}
 
@@ -980,6 +989,8 @@ namespace RTC
 				  RtcLogger::RtpPacket::DropReason::PACKET_PREVIOUS_TO_SPATIAL_LAYER_SWITCH);
 #endif
 
+				this->rtpSeqManager->Drop(packet->GetSequenceNumber());
+
 				return;
 			}
 			else if (SeqManager<uint16_t>::IsSeqHigherThan(
@@ -1022,11 +1033,11 @@ namespace RTC
 			// Rewrite payload if needed. Drop packet if necessary.
 			if (!packet->ProcessPayload(this->encodingContext.get(), marker))
 			{
-				this->rtpSeqManager->Drop(packet->GetSequenceNumber());
-
 #ifdef MS_RTC_LOGGER_RTP
 				packet->logger.Dropped(RtcLogger::RtpPacket::DropReason::DROPPED_BY_CODEC);
 #endif
+
+				this->rtpSeqManager->Drop(packet->GetSequenceNumber());
 
 				return;
 			}
